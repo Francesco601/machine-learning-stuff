@@ -8,7 +8,6 @@ from tensorflow.keras.layers import Add, GlobalAveragePooling2D,\
 from tensorflow.keras.optimizers import schedules, SGD
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 
-
 def model_configuration():
 	"""
 		Get configuration variables for the model.
@@ -33,10 +32,11 @@ def model_configuration():
 
 	# Number of steps per epoch is dependent on batch size
 	maximum_number_iterations = 64000 # per the He et al. paper
-	steps_per_epoch = tensorflow.math.floor(train_size / batch_size)
-	val_steps_per_epoch = tensorflow.math.floor(val_size / batch_size)
-	epochs = tensorflow.cast(tensorflow.math.floor(maximum_number_iterations / steps_per_epoch),\
-		dtype=tensorflow.int64)
+	
+	# Convert to regular Python integers instead of TensorFlow tensors
+	steps_per_epoch = int(train_size // batch_size)  # Use // for integer division
+	val_steps_per_epoch = int(val_size // batch_size)  # Use // for integer division
+	epochs = int(maximum_number_iterations // steps_per_epoch)  # Use // for integer division
 
 	# Define loss function
 	loss = tensorflow.keras.losses.CategoricalCrossentropy(from_logits=True)
@@ -63,7 +63,7 @@ def model_configuration():
 
 	# Save a model checkpoint after every epoch
 	checkpoint = ModelCheckpoint(
-		os.path.join(os.getcwd(), "model_checkpoint"),
+		os.path.join(os.getcwd(), "model_checkpoint.keras"),
 		save_freq="epoch"
 	)
 
@@ -99,6 +99,7 @@ def model_configuration():
 	}
 
 	return config
+
 
 
 def load_dataset():
@@ -350,6 +351,5 @@ def training_process():
 
 if __name__ == "__main__":
 	training_process()
-
 
         
